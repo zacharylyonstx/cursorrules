@@ -178,3 +178,5 @@ MIT © [Zachary Lyons](https://github.com/zacharylyonstx)
 ---
 
 **If this saves you time, [star the repo](https://github.com/zacharylyonstx/cursorrules) ⭐ and [sponsor the project](https://github.com/sponsors/zacharylyonstx) 💛**
+
+₿ Bitcoin tips: `bc1qshgk2p79jg34ax3lpywqj47fpcrqzsma95gesw`
