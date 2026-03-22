@@ -1,0 +1,53 @@
+{
+  "name": "cursorrules",
+  "version": "1.0.0",
+  "description": "Generate optimal .cursorrules files for any project. Auto-detects frameworks, languages, and patterns to create AI-powered coding rules tailored to your codebase.",
+  "main": "src/index.js",
+  "bin": {
+    "cursorrules": "bin/cursorrules.js"
+  },
+  "scripts": {
+    "test": "node bin/cursorrules.js list",
+    "pack": "npm pack"
+  },
+  "keywords": [
+    "cursor",
+    "cursorrules",
+    "cursor-rules",
+    "ai",
+    "coding-assistant",
+    "rules",
+    "cursor-ide",
+    "ai-coding",
+    "code-generation",
+    "developer-tools",
+    "productivity",
+    "copilot",
+    "ai-rules",
+    "project-config",
+    "dotfiles"
+  ],
+  "author": "Zachary Lyons",
+  "license": "MIT",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/zacharylyonstx"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zacharylyonstx/cursorrules.git"
+  },
+  "homepage": "https://github.com/zacharylyonstx/cursorrules",
+  "bugs": {
+    "url": "https://github.com/zacharylyonstx/cursorrules/issues"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "LICENSE",
+    "README.md"
+  ]
+}
