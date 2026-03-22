@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cursorrules — Generate .cursorrules for Cursor AI</title>
+<meta name="description" content="Generate optimal .cursorrules files for any project. Auto-detects frameworks, languages, and patterns. 24 presets, zero dependencies.">
+<meta name="theme-color" content="#0ea5e9">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--bg-raised:#12121a;--bg-card:#181824;--bg-terminal:#0d1117;
+  --text:#e4e4ef;--text-dim:#8b8ba0;--text-bright:#f8f8ff;
+  --accent:#0ea5e9;--accent-glow:rgba(14,165,233,.15);--accent-dim:#0c8bc7;
+  --green:#22c55e;--green-glow:rgba(34,197,94,.12);
+  --border:#1e1e2e;--border-bright:#2a2a3e;
+  --radius:12px;--radius-sm:8px;
+}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none;transition:color .2s}
+a:hover{color:var(--text-bright)}
+::selection{background:var(--accent);color:var(--bg)}
+
+/* Layout */
+.container{max-width:1100px;margin:0 auto;padding:0 24px}
+section{padding:80px 0}
+@media(max-width:640px){section{padding:56px 0}.container{padding:0 16px}}
+
+/* Nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,15,.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center}
+nav .inner{max-width:1100px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between}
+nav .logo{font-weight:700;font-size:1.1rem;color:var(--text-bright);display:flex;align-items:center;gap:8px}
+nav .logo span{color:var(--accent)}
+nav .links{display:flex;align-items:center;gap:24px}
+nav .links a{color:var(--text-dim);font-size:.875rem;font-weight:500;transition:color .2s}
+nav .links a:hover{color:var(--text-bright)}
+.gh-star{display:inline-flex;align-items:center;gap:6px;background:var(--bg-card);border:1px solid var(--border-bright);padding:6px 14px;border-radius:20px;font-size:.8rem;font-weight:600;color:var(--text-bright);transition:all .25s}
+.gh-star:hover{border-color:var(--accent);background:var(--accent-glow);color:var(--accent)}
+.gh-star svg{width:16px;height:16px;fill:currentColor}
+@media(max-width:640px){nav .links a.hide-mobile{display:none}}
+
+/* Hero */
+.hero{padding-top:140px;padding-bottom:80px;text-align:center;position:relative}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:800px;height:600px;background:radial-gradient(ellipse,var(--accent-glow) 0%,transparent 70%);pointer-events:none;z-index:0}
+.hero>*{position:relative;z-index:1}
+.badge{display:inline-flex;align-items:center;gap:6px;background:var(--accent-glow);border:1px solid rgba(14,165,233,.25);color:var(--accent);font-size:.8rem;font-weight:600;padding:4px 14px;border-radius:20px;margin-bottom:24px}
+.badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse-dot 2s ease infinite}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+h1{font-size:clamp(2.5rem,6vw,4rem);font-weight:800;letter-spacing:-.03em;line-height:1.1;color:var(--text-bright);margin-bottom:16px}
+h1 .accent{background:linear-gradient(135deg,var(--accent),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p.sub{font-size:clamp(1rem,2.5vw,1.25rem);color:var(--text-dim);max-width:580px;margin:0 auto 40px}
+.hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:48px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:var(--radius-sm);font-weight:600;font-size:.95rem;transition:all .25s;cursor:pointer;border:none}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 0 24px var(--accent-glow)}
+.btn-primary:hover{background:var(--accent-dim);transform:translateY(-1px);box-shadow:0 4px 32px rgba(14,165,233,.3);color:#fff}
+.btn-secondary{background:var(--bg-card);color:var(--text-bright);border:1px solid var(--border-bright)}
+.btn-secondary:hover{border-color:var(--accent);background:var(--accent-glow);color:var(--accent)}
+.copy-cmd{display:inline-flex;align-items:center;gap:10px;background:var(--bg-terminal);border:1px solid var(--border-bright);padding:10px 18px;border-radius:var(--radius-sm);font-family:'SF Mono',Monaco,'Cascadia Code',Consolas,monospace;font-size:.9rem;color:var(--green);cursor:pointer;transition:all .2s;margin-bottom:48px}
+.copy-cmd:hover{border-color:var(--green);background:var(--green-glow)}
+.copy-cmd .dollar{color:var(--text-dim);user-select:none}
+.copy-cmd .copy-icon{color:var(--text-dim);transition:color .2s}
+.copy-cmd:hover .copy-icon{color:var(--green)}
+
+/* Terminal */
+.terminal{max-width:640px;margin:0 auto;background:var(--bg-terminal);border:1px solid var(--border-bright);border-radius:var(--radius);overflow:hidden;text-align:left;box-shadow:0 24px 80px rgba(0,0,0,.5)}
+.terminal-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border)}
+.terminal-dot{width:12px;height:12px;border-radius:50%}
+.terminal-dot.r{background:#ff5f57}.terminal-dot.y{background:#febc2e}.terminal-dot.g{background:#28c840}
+.terminal-title{flex:1;text-align:center;font-size:.75rem;color:var(--text-dim);font-family:monospace}
+.terminal-body{padding:20px;font-family:'SF Mono',Monaco,'Cascadia Code',Consolas,monospace;font-size:.85rem;line-height:1.8;min-height:220px}
+.terminal-body .line{white-space:pre;opacity:0;transform:translateY(4px);transition:opacity .3s,transform .3s}
+.terminal-body .line.visible{opacity:1;transform:translateY(0)}
+.terminal-body .prompt{color:var(--green)}
+.terminal-body .cmd{color:var(--text-bright)}
+.terminal-body .cursor-blink{display:inline-block;width:8px;height:16px;background:var(--text-bright);animation:blink 1s step-end infinite;vertical-align:text-bottom;margin-left:2px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.terminal-body .dim{color:var(--text-dim)}
+.terminal-body .blue{color:var(--accent)}
+.terminal-body .grn{color:var(--green)}
+.terminal-body .yel{color:#facc15}
+
+/* Section headers */
+.section-label{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:12px}
+.section-title{font-size:clamp(1.75rem,4vw,2.5rem);font-weight:800;color:var(--text-bright);letter-spacing:-.02em;margin-bottom:12px}
+.section-desc{color:var(--text-dim);max-width:560px;font-size:1.05rem}
+.section-header{text-align:center;margin-bottom:56px}
+.section-header .section-desc{margin:0 auto}
+
+/* Features */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.feature-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:28px;transition:all .3s}
+.feature-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 32px rgba(14,165,233,.08)}
+.feature-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:16px;background:var(--accent-glow);border:1px solid rgba(14,165,233,.15)}
+.feature-card h3{font-size:1.1rem;font-weight:700;color:var(--text-bright);margin-bottom:8px}
+.feature-card p{color:var(--text-dim);font-size:.9rem;line-height:1.6}
+
+/* Presets */
+.presets-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+@media(max-width:480px){.presets-grid{grid-template-columns:repeat(3,1fr);gap:8px}}
+.preset{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);transition:all .25s;cursor:default}
+.preset:hover{border-color:var(--accent);background:var(--accent-glow);transform:translateY(-1px)}
+.preset-icon{font-size:1.2rem;flex-shrink:0}
+.preset-name{font-size:.85rem;font-weight:600;color:var(--text-bright)}
+@media(max-width:480px){.preset{padding:10px 12px;gap:8px}.preset-icon{font-size:1rem}.preset-name{font-size:.78rem}}
+
+/* Quick Start */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:48px}
+.step{position:relative;padding:28px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius)}
+.step-num{position:absolute;top:-14px;left:20px;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+.step h3{font-size:1rem;font-weight:700;color:var(--text-bright);margin-bottom:8px;margin-top:4px}
+.step code{display:block;background:var(--bg-terminal);padding:10px 14px;border-radius:6px;font-family:'SF Mono',Monaco,Consolas,monospace;font-size:.85rem;color:var(--green);margin-top:10px;overflow-x:auto}
+.step p{color:var(--text-dim);font-size:.9rem}
+
+/* Support */
+.support-section{text-align:center}
+.support-card{max-width:560px;margin:0 auto;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:40px;position:relative;overflow:hidden}
+.support-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--green))}
+.support-card h3{font-size:1.4rem;font-weight:800;color:var(--text-bright);margin-bottom:8px}
+.support-card p{color:var(--text-dim);margin-bottom:24px;font-size:.95rem}
+.sponsor-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:var(--radius-sm);font-weight:600;font-size:.95rem;background:linear-gradient(135deg,#db61a2,#e47bba);color:#fff;transition:all .25s;border:none;cursor:pointer}
+.sponsor-btn:hover{transform:translateY(-1px);box-shadow:0 8px 32px rgba(219,97,162,.3);color:#fff}
+.sponsor-btn svg{width:18px;height:18px;fill:currentColor}
+
+/* Footer */
+footer{border-top:1px solid var(--border);padding:32px 0;text-align:center}
+footer p{color:var(--text-dim);font-size:.85rem}
+footer a{color:var(--accent)}
+
+/* Animations */
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important}}
+.fade-in{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <div class="inner">
+    <a href="#" class="logo"><span>⚡</span> cursorrules</a>
+    <div class="links">
+      <a href="#features" class="hide-mobile">Features</a>
+      <a href="#presets" class="hide-mobile">Presets</a>
+      <a href="#quickstart" class="hide-mobile">Quick Start</a>
+      <a href="https://github.com/zacharylyonstx/cursorrules" target="_blank" rel="noopener" class="gh-star">
+        <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        Star on GitHub
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container">
+    <div class="badge">Open Source CLI Tool</div>
+    <h1>Generate <span class="accent">.cursorrules</span><br>for any project</h1>
+    <p class="sub">Auto-detects your frameworks, languages, and tools. Creates genuinely useful AI coding rules — not generic boilerplate.</p>
+    <div class="hero-actions">
+      <a href="https://github.com/zacharylyonstx/cursorrules" target="_blank" rel="noopener" class="btn btn-primary">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        View on GitHub
+      </a>
+      <a href="https://www.npmjs.com/package/cursorrules" target="_blank" rel="noopener" class="btn btn-secondary">
+        <svg width="18" height="18" viewBox="0 0 576 512" fill="currentColor"><path d="M288 288h-32v-64h32v64zm288-128v192H288v32H160v-32H0V160h576zm-416 32H32v128h64v-96h32v96h32V192zm160 0H192v160h64v-32h64V192zm224 0H352v128h64v-96h32v96h32v-96h32v96h32V192z"/></svg>
+        npm Package
+      </a>
+    </div>
+    <div class="copy-cmd" onclick="copyInstall()" id="copyCmd">
+      <span class="dollar">$</span> npx cursorrules init
+      <svg class="copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+    </div>
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="terminal-dot r"></div>
+        <div class="terminal-dot y"></div>
+        <div class="terminal-dot g"></div>
+        <div class="terminal-title">~/my-project — zsh</div>
+      </div>
+      <div class="terminal-body" id="terminalBody"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section id="features">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-label">⚡ Features</div>
+      <h2 class="section-title">Everything you need, nothing you don't</h2>
+      <p class="section-desc">One command. Zero dependencies. Intelligent rules tailored to your actual stack.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card fade-in">
+        <div class="feature-icon">🔍</div>
+        <h3>Auto-Detection</h3>
+        <p>Scans package.json, go.mod, Cargo.toml, requirements.txt, and file structure to detect your entire stack automatically.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon">🎯</div>
+        <h3>24 Framework Presets</h3>
+        <p>Hand-crafted rules for React, Next.js, Vue, Svelte, Django, FastAPI, Go, Rust, and 16 more — each with 150+ lines of real rules.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon">🔄</div>
+        <h3>Smart Merging</h3>
+        <p>Combines multiple presets intelligently. React + Next.js + Tailwind + Prisma? Get rules for all four, deduplicated and clean.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon">📦</div>
+        <h3>Zero Dependencies</h3>
+        <p>Pure Node.js. No install step, no lock files, no supply chain risk. Just npx and go.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon">⚡</div>
+        <h3>Instant Setup</h3>
+        <p>One command generates your entire .cursorrules file. No config files, no setup wizards, no decisions to make.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon">🧩</div>
+        <h3>Composable</h3>
+        <p>Add individual presets incrementally with <code>cursorrules add</code>. Build your perfect ruleset piece by piece.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Presets -->
+<section id="presets" style="background:var(--bg-raised)">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-label">🧱 Presets</div>
+      <h2 class="section-title">24 framework presets</h2>
+      <p class="section-desc">Each preset contains 150+ lines of carefully crafted rules. Auto-detected or manually added.</p>
+    </div>
+    <div class="presets-grid fade-in">
+      <div class="preset"><span class="preset-icon">⚛️</span><span class="preset-name">React</span></div>
+      <div class="preset"><span class="preset-icon">▲</span><span class="preset-name">Next.js</span></div>
+      <div class="preset"><span class="preset-icon">💚</span><span class="preset-name">Vue</span></div>
+      <div class="preset"><span class="preset-icon">🔥</span><span class="preset-name">Svelte</span></div>
+      <div class="preset"><span class="preset-icon">🅰️</span><span class="preset-name">Angular</span></div>
+      <div class="preset"><span class="preset-icon">🟦</span><span class="preset-name">TypeScript</span></div>
+      <div class="preset"><span class="preset-icon">🟢</span><span class="preset-name">Node.js</span></div>
+      <div class="preset"><span class="preset-icon">🚂</span><span class="preset-name">Express</span></div>
+      <div class="preset"><span class="preset-icon">🐍</span><span class="preset-name">Python</span></div>
+      <div class="preset"><span class="preset-icon">⚡</span><span class="preset-name">FastAPI</span></div>
+      <div class="preset"><span class="preset-icon">🎸</span><span class="preset-name">Django</span></div>
+      <div class="preset"><span class="preset-icon">🧪</span><span class="preset-name">Flask</span></div>
+      <div class="preset"><span class="preset-icon">🐹</span><span class="preset-name">Go</span></div>
+      <div class="preset"><span class="preset-icon">🦀</span><span class="preset-name">Rust</span></div>
+      <div class="preset"><span class="preset-icon">☕</span><span class="preset-name">Java/Spring</span></div>
+      <div class="preset"><span class="preset-icon">💎</span><span class="preset-name">Ruby/Rails</span></div>
+      <div class="preset"><span class="preset-icon">🐘</span><span class="preset-name">PHP</span></div>
+      <div class="preset"><span class="preset-icon">🔺</span><span class="preset-name">Laravel</span></div>
+      <div class="preset"><span class="preset-icon">🍎</span><span class="preset-name">Swift/iOS</span></div>
+      <div class="preset"><span class="preset-icon">🎨</span><span class="preset-name">Tailwind CSS</span></div>
+      <div class="preset"><span class="preset-icon">💠</span><span class="preset-name">Prisma</span></div>
+      <div class="preset"><span class="preset-icon">🐳</span><span class="preset-name">Docker</span></div>
+      <div class="preset"><span class="preset-icon">🧪</span><span class="preset-name">Testing</span></div>
+      <div class="preset"><span class="preset-icon">📦</span><span class="preset-name">Monorepo</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- Quick Start -->
+<section id="quickstart">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-label">🚀 Quick Start</div>
+      <h2 class="section-title">Up and running in seconds</h2>
+      <p class="section-desc">No install needed. Just run with npx.</p>
+    </div>
+    <div class="steps">
+      <div class="step fade-in">
+        <div class="step-num">1</div>
+        <h3>Auto-detect & generate</h3>
+        <p>Scans your project, detects frameworks, generates rules.</p>
+        <code>$ npx cursorrules init</code>
+      </div>
+      <div class="step fade-in">
+        <div class="step-num">2</div>
+        <h3>Add specific presets</h3>
+        <p>Manually add rules for any framework. Smart merging, no duplicates.</p>
+        <code>$ npx cursorrules add react<br>$ npx cursorrules add tailwind</code>
+      </div>
+      <div class="step fade-in">
+        <div class="step-num">3</div>
+        <h3>Browse all presets</h3>
+        <p>See every available preset with descriptions and aliases.</p>
+        <code>$ npx cursorrules list</code>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Support -->
+<section id="support" style="background:var(--bg-raised)">
+  <div class="container support-section">
+    <div class="section-header fade-in">
+      <div class="section-label">❤️ Support</div>
+      <h2 class="section-title">Help keep this project alive</h2>
+    </div>
+    <div class="support-card fade-in">
+      <h3>Sponsor on GitHub</h3>
+      <p>If cursorrules saves you time, consider sponsoring the project. Every bit helps fund development, new presets, and better detection.</p>
+      <a href="https://github.com/sponsors/zacharylyonstx" target="_blank" rel="noopener" class="sponsor-btn">
+        <svg viewBox="0 0 16 16"><path d="M4.25 2.5c-1.336 0-2.75 1.164-2.75 3 0 2.15 1.58 4.144 3.365 5.682A20.565 20.565 0 008 13.393a20.561 20.561 0 003.135-2.211C12.92 9.644 14.5 7.65 14.5 5.5c0-1.836-1.414-3-2.75-3-1.373 0-2.609.986-3.029 2.456a.75.75 0 01-1.442 0C6.859 3.486 5.623 2.5 4.25 2.5z"/></svg>
+        Sponsor
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <p>Built by <a href="https://github.com/zacharylyonstx" target="_blank" rel="noopener">Zachary Lyons</a> · MIT License · <a href="https://github.com/zacharylyonstx/cursorrules" target="_blank" rel="noopener">GitHub</a> · <a href="https://www.npmjs.com/package/cursorrules" target="_blank" rel="noopener">npm</a></p>
+  </div>
+</footer>
+
+<script>
+// Copy install command
+function copyInstall(){
+  navigator.clipboard.writeText('npx cursorrules init');
+  const el=document.getElementById('copyCmd');
+  const orig=el.innerHTML;
+  el.style.borderColor='var(--green)';
+  setTimeout(()=>el.style.borderColor='',1500);
+}
+
+// Terminal animation
+(function(){
+  const body=document.getElementById('terminalBody');
+  const lines=[
+    {type:'prompt',text:'$ ',cmd:'npx cursorrules init',typing:true},
+    {type:'blank'},
+    {type:'output',html:'<span class="blue">⚡ cursorrules v1.0.0</span>'},
+    {type:'output',html:'<span class="dim">   Scanning project...</span>'},
+    {type:'blank'},
+    {type:'output',html:'<span class="grn">✔</span> Detected <span class="cmd">React</span> from package.json'},
+    {type:'output',html:'<span class="grn">✔</span> Detected <span class="cmd">Next.js</span> from next.config.js'},
+    {type:'output',html:'<span class="grn">✔</span> Detected <span class="cmd">TypeScript</span> from tsconfig.json'},
+    {type:'output',html:'<span class="grn">✔</span> Detected <span class="cmd">Tailwind CSS</span> from tailwind.config.ts'},
+    {type:'output',html:'<span class="grn">✔</span> Detected <span class="cmd">Prisma</span> from prisma/schema.prisma'},
+    {type:'blank'},
+    {type:'output',html:'<span class="yel">→</span> Loaded <span class="cmd">5 presets</span> (750+ rules)'},
+    {type:'output',html:'<span class="yel">→</span> Merged and deduplicated'},
+    {type:'blank'},
+    {type:'output',html:'<span class="grn">✔</span> Generated <span class="cmd">.cursorrules</span> <span class="dim">(423 lines)</span>'},
+  ];
+
+  let html='';
+  lines.forEach((l,i)=>{
+    if(l.type==='blank'){html+='<div class="line" data-i="'+i+'">&nbsp;</div>';return}
+    if(l.type==='prompt'){html+='<div class="line" data-i="'+i+'"><span class="prompt">'+l.text+'</span><span class="cmd" id="typedCmd"></span><span class="cursor-blink" id="caret"></span></div>';return}
+    html+='<div class="line" data-i="'+i+'">'+l.html+'</div>';
+  });
+  body.innerHTML=html;
+
+  const allLines=body.querySelectorAll('.line');
+  const typedCmd=document.getElementById('typedCmd');
+  const caret=document.getElementById('caret');
+  const cmdText=lines[0].cmd;
+  let charIdx=0;
+
+  // show prompt line immediately
+  allLines[0].classList.add('visible');
+
+  function typeChar(){
+    if(charIdx<cmdText.length){
+      typedCmd.textContent+=cmdText[charIdx];
+      charIdx++;
+      setTimeout(typeChar,45+Math.random()*35);
+    } else {
+      caret.style.display='none';
+      setTimeout(showOutput,400);
+    }
+  }
+
+  let lineIdx=1;
+  function showOutput(){
+    if(lineIdx<allLines.length){
+      allLines[lineIdx].classList.add('visible');
+      lineIdx++;
+      setTimeout(showOutput,120);
+    } else {
+      // restart after a pause
+      setTimeout(restart,4000);
+    }
+  }
+
+  function restart(){
+    allLines.forEach(l=>l.classList.remove('visible'));
+    typedCmd.textContent='';
+    caret.style.display='';
+    charIdx=0;
+    lineIdx=1;
+    allLines[0].classList.add('visible');
+    setTimeout(typeChar,600);
+  }
+
+  setTimeout(typeChar,800);
+})();
+
+// Scroll reveal
+(function(){
+  const obs=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}});
+  },{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
+})();
+
+// Smooth scroll for nav links
+document.querySelectorAll('nav a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    e.preventDefault();
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+});
+</script>
+</body>
+</html>
