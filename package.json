@@ -1,5 +1,5 @@
 {
-  "name": "cursorrules",
+  "name": "@zacharylyonstx/cursorrules",
   "version": "1.0.0",
   "description": "Generate optimal .cursorrules files for any project. Auto-detects frameworks, languages, and patterns to create AI-powered coding rules tailored to your codebase.",
   "main": "src/index.js",
@@ -49,5 +49,8 @@
     "src/",
     "LICENSE",
     "README.md"
-  ]
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
 }
